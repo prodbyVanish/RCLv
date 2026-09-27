@@ -1,1 +1,11 @@
-
+{
+    "id": 149119945,
+    "name": "griefer",
+    "author": "shotbykonnie",
+    "creators": ["shotbykonnie"],
+    "verifier": "shotbykonnie",
+    "verification": "YOUR_YOUTUBE_VIDEO_URL",
+    "percentToQualify": 80,
+    "password": "No Password",
+    "records": []
+}
