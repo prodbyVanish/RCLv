@@ -1,236 +1,113 @@
-import { fetchLeaderboard, fetchList } from '../content.js';
-import { localize } from '../util.js';
+.page-leaderboard-container {
+    display: block;
+}
 
-import Spinner from '../components/Spinner.js';
+.page-leaderboard {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(24rem, 2fr) 3fr;
+    grid-template-rows: max-content 1fr;
+    column-gap: 2rem;
+    max-width: 80rem;
+    margin: 0 auto;
+}
 
-export default {
-    components: {
-        Spinner,
-    },
+.page-leaderboard > div {
+    overflow-y: auto;
+}
 
-    data: () => ({
-        leaderboard: [],
-        levels: [],
-        loading: true,
-        selected: 0,
-        err: [],
-    }),
+.page-leaderboard .error-container {
+    grid-row: 1;
+    grid-column: 1 / span 2;
+}
 
-    template: `
-        <main v-if="loading">
-            <Spinner></Spinner>
-        </main>
+.page-leaderboard .error-container .error {
+    padding: 1rem;
+    background-color: var(--color-error);
+    color: var(--color-on-error);
+}
 
-        <main v-else class="page-leaderboard-container">
-            <div class="page-leaderboard">
+.page-leaderboard .board-container,
+.page-leaderboard .player-container {
+    grid-row: 2;
+    padding-block: 2rem;
+}
 
-                <div class="error-container">
-                    <p class="error" v-if="err.length > 0">
-                        Leaderboard may be incorrect, as the following levels could not be loaded: {{ err.join(', ') }}
-                    </p>
-                </div>
+.page-leaderboard .board-container {
+    padding-inline: 1rem;
+}
 
-                <div class="board-container">
-                    <table class="board">
-                        <tr v-for="(ientry, i) in leaderboard">
-                            <td class="rank">
-                                <p class="type-label-lg">#{{ i + 1 }}</p>
-                            </td>
+.page-leaderboard .board {
+    table-layout: auto;
+    display: block;
+    width: 100%;
+}
 
-                            <td class="total">
-                                <p class="type-label-lg">
-                                    {{ localize(ientry.total) }}
-                                </p>
-                            </td>
+.page-leaderboard .board .rank {
+    padding-block: 1rem;
+    text-align: end;
+}
 
-                            <td
-                                class="user"
-                                :class="{ 'active': selected == i }"
-                            >
-                                <button @click="selected = i">
-                                    <span class="type-label-lg">
-                                        {{ ientry.user }}
-                                    </span>
-                                </button>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+.page-leaderboard .board .total {
+    padding: 1rem;
+    text-align: end;
+}
 
-                <div class="player-container">
-                    <div class="player">
+.page-leaderboard .board .user {
+    width: 100%;
+}
 
-                        <h1>
-                            #{{ selected + 1 }} {{ entry.user }}
-                        </h1>
+.page-leaderboard .board .user button {
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: start;
+    word-break: normal;
+    overflow-wrap: anywhere;
+}
 
-                        <h3>
-                            {{ localize(entry.total) }}
-                        </h3>
+.page-leaderboard .board .user button:hover {
+    background-color: var(--color-background-hover);
+    color: var(--color-on-background-hover);
+    cursor: pointer;
+}
 
-                        <!-- LEVELS CREATED -->
-                        <p class="type-label-lg">
-                            Levels Created: {{ levelsCreated }}
-                        </p>
+.page-leaderboard .board .user.active button {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
 
-                        <!-- VERIFIED -->
-                        <h2 v-if="entry.verified.length > 0">
-                            Verified ({{ entry.verified.length }})
-                        </h2>
+.page-leaderboard .player {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-right: 2rem;
+}
 
-                        <table class="table">
-                            <tr v-for="score in entry.verified">
+.page-leaderboard .player .table {
+    table-layout: fixed;
+}
 
-                                <td class="rank">
-                                    <p>#{{ score.rank }}</p>
-                                </td>
+.page-leaderboard .player .table tr td:not(:last-child) {
+    padding-right: 2rem;
+}
 
-                                <td class="level">
-                                    <a
-                                        class="type-label-lg"
-                                        target="_blank"
-                                        :href="score.link"
-                                    >
-                                        {{ score.level }}
-                                    </a>
-                                </td>
+.page-leaderboard .player .table p,
+.page-leaderboard .player .table a {
+    padding-block: 1rem;
+}
 
-                                <td class="score">
-                                    <p>
-                                        +{{ localize(score.score) }}
-                                    </p>
-                                </td>
+.page-leaderboard .player .table .rank p,
+.page-leaderboard .player .table .score p {
+    text-align: end;
+}
 
-                            </tr>
-                        </table>
+.page-leaderboard .player .table .level {
+    width: 100%;
+}
 
-                        <!-- COMPLETED -->
-                        <h2 v-if="entry.completed.length > 0">
-                            Completed ({{ entry.completed.length }})
-                        </h2>
-
-                        <table class="table">
-                            <tr v-for="score in entry.completed">
-
-                                <td class="rank">
-                                    <p>#{{ score.rank }}</p>
-                                </td>
-
-                                <td class="level">
-                                    <a
-                                        class="type-label-lg"
-                                        target="_blank"
-                                        :href="score.link"
-                                    >
-                                        {{ score.level }}
-                                    </a>
-                                </td>
-
-                                <td class="score">
-                                    <p>
-                                        +{{ localize(score.score) }}
-                                    </p>
-                                </td>
-
-                            </tr>
-                        </table>
-
-                        <!-- PROGRESSED -->
-                        <h2 v-if="entry.progressed.length > 0">
-                            Progressed ({{ entry.progressed.length }})
-                        </h2>
-
-                        <table class="table">
-                            <tr v-for="score in entry.progressed">
-
-                                <td class="rank">
-                                    <p>#{{ score.rank }}</p>
-                                </td>
-
-                                <td class="level">
-                                    <a
-                                        class="type-label-lg"
-                                        target="_blank"
-                                        :href="score.link"
-                                    >
-                                        {{ score.percent }}% {{ score.level }}
-                                    </a>
-                                </td>
-
-                                <td class="score">
-                                    <p>
-                                        +{{ localize(score.score) }}
-                                    </p>
-                                </td>
-
-                            </tr>
-                        </table>
-
-                    </div>
-                </div>
-
-            </div>
-        </main>
-    `,
-
-    computed: {
-
-        entry() {
-            return this.leaderboard[this.selected];
-        },
-
-        levelsCreated() {
-            if (!this.entry) {
-                return 0;
-            }
-
-            const username = this.entry.user.toLowerCase();
-
-            return this.levels.filter(level => {
-
-                // Check author
-                if (
-                    typeof level.author === 'string' &&
-                    level.author.toLowerCase() === username
-                ) {
-                    return true;
-                }
-
-                // Check creators
-                if (Array.isArray(level.creators)) {
-                    return level.creators.some(
-                        creator =>
-                            typeof creator === 'string' &&
-                            creator.toLowerCase() === username
-                    );
-                }
-
-                return false;
-            }).length;
-        },
-    },
-
-    async mounted() {
-
-        const [leaderboard, err] = await fetchLeaderboard();
-
-        const levelsResult = await fetchList();
-
-        this.leaderboard = leaderboard;
-
-        this.levels = levelsResult
-            ? levelsResult
-                .filter(([level]) => level)
-                .map(([level]) => level)
-            : [];
-
-        this.err = err;
-
-        // Hide loading spinner
-        this.loading = false;
-    },
-
-    methods: {
-        localize,
-    },
-};
+.page-leaderboard .player .table a:hover {
+    text-decoration: underline;
+}
