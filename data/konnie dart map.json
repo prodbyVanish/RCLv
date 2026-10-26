@@ -8,9 +8,11 @@
     "percentToQualify": 80,
     "password": "No Password",
     "records": [
-    {
-        "user": "shotbykonnie",
-        "link": "https://www.youtube.com/watch?v=YOUR_VIDEO_ID",
-        "percent": 100,
-        "hz": 240
-    }
+        {
+            "user": "shotbykonnie",
+            "link": "https://www.youtube.com/watch?v=YOUR_VIDEO_ID",
+            "percent": 100,
+            "hz": 240
+        }
+    ]
+}
